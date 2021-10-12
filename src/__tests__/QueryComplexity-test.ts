@@ -796,4 +796,27 @@ describe('QueryComplexity analysis', () => {
     });
     expect(complexity).to.equal(30); // 3 fields on nonNullItem * 10
   });
+
+  it('should handle invalid arguments when there are multiple queries', () => {
+    const ast = parse(`
+      query {
+        requiredArgs(count: x) {
+          scalar
+          complexScalar
+        }
+        nonNullItem {
+          scalar
+          complexScalar
+          variableScalar(count: 10)
+        }
+      }
+    `);
+
+    const complexity = getComplexity({
+      estimators: [simpleEstimator({ defaultComplexity: 1 })],
+      schema,
+      query: ast,
+    });
+    expect(complexity).to.equal(1);
+  });
 });
