@@ -2,7 +2,14 @@
  * Created by Ivo Meißner on 28.07.17.
  */
 
-import { parse, TypeInfo, visit, visitWithTypeInfo } from 'graphql';
+import {
+  parse,
+  specifiedRules,
+  TypeInfo,
+  validate,
+  visit,
+  visitWithTypeInfo,
+} from 'graphql';
 
 import { expect } from 'chai';
 
@@ -812,10 +819,16 @@ describe('QueryComplexity analysis', () => {
       }
     `);
 
-    getComplexity({
-      estimators: [simpleEstimator({ defaultComplexity: 1 })],
-      schema,
-      query: ast,
-    });
+    validate(schema, ast, [
+      ...specifiedRules,
+      createComplexityRule({
+        maximumComplexity: 1000,
+        estimators: [
+          simpleEstimator({
+            defaultComplexity: 1,
+          }),
+        ],
+      }),
+    ]);
   });
 });
